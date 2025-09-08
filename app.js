@@ -1,6 +1,6 @@
 'use strict';
 
-const port = 80;
+const portServ = 80;
 
 var express = require('express');
 
@@ -18,8 +18,33 @@ exp.use(function (err, req, res, next) {
     res.status(500).send('Erreur serveur express');
 }); 
 
-exp.listen(port, function () {
-    console.log('Serveur en ecoute');
-}); 
+
+
+/*  *************** serveur WebSocket express *********************   */
+// 
+var expressWs = require('express-ws')(exp);
+
+// Connexion des clients à la WebSocket /echo et evenements associés 
+exp.ws('/echo', function (ws, req) {
+
+    console.log('Connection WebSocket %s sur le port %s',
+        req.connection.remoteAddress, req.connection.remotePort);
+
+    ws.on('message', function (message) {
+        console.log('De %s %s, message :%s', req.connection.remoteAddress,
+            req.connection.remotePort, message);
+        ws.send(message);
+    });
+
+    ws.on('close', function (reasonCode, description) {
+        console.log('Deconnexion WebSocket %s sur le port %s',
+            req.connection.remoteAddress, req.connection.remotePort);
+    });
+
+});
+
+exp.listen(portServ, function () {
+    console.log('Serveur 2 en ecoute');
+});
 
 console.log('TP CIEL');
