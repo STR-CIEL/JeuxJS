@@ -114,10 +114,19 @@ exp.ws('/qr', function (ws, req) {
 
 
     function NouvelleQuestion() {
-        var x = GetRandomInt(11);
+        /*var x = GetRandomInt(11);
         var y = GetRandomInt(11);
         question = x + '*' + y + ' =  ?';
-        bonneReponse = x * y;
+        bonneReponse = x * y;*/
+
+
+
+        var nombreDeci = Math.floor(Math.random() * 256);
+        var nombreBin = nombreDeci.toString(2).padStart(8, '0');
+        question = nombreBin;
+        bonneReponse = nombreDeci;
+
+
         aWss.broadcast(question);
     }
 
