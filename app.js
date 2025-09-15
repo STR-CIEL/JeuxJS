@@ -92,9 +92,24 @@ exp.ws('/qr', function (ws, req) {
     function TraiterReponse(message) {
         console.log('De %s %s, message :%s', req.connection.remoteAddress,
             req.connection.remotePort, message);
+
+
+
+
+
         if (message == bonneReponse) {
             NouvelleQuestion();
         }
+        else {
+            ws.send('Mauvaise reponse.');
+            setTimeout(() => {
+                
+                NouvelleQuestion();
+               
+            }, 3000);
+            
+        }
+
     }
 
 
