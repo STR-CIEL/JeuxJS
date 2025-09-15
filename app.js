@@ -1,6 +1,50 @@
 'use strict';
+class CQr {
+    constructor() {
+        this.question = '?';
+        this.bonneReponse = 0;
+
+    }
+    GetRandomInt(min, max) {
+        return Math.floor(Math.random() * Math.floor(max));
+    }
+    NouvelleQuestion() {
+
+        var nombreDecimal = Math.floor(Math.random() * 256);
+        var nombreBinaire = nombreDecimal.toString(2).padStart(8, '0');
+        this.question = nombreBinaire;
+        this.bonneReponse = nombreDecimal; 
+
+
+        aWss.broadcast(this.question);
+
+        
+    }
+    TraiterReponse(wsClient, message, req) {
+        console.log('Connection WebSocket %s sur le port %s', req.connection.remoteAddress,
+            req.connection.remotePort);
+
+  
+
+        if (message == this.bonneReponse) {
+            this.NouvelleQuestion();
+        }
+        else {
+            wsClient.send('Mauvaise reponse.');
+            setTimeout(() => {
+
+                this.NouvelleQuestion();
+
+            }, 3000);
+
+        }
+
+    }
+} 
 
 const portServ = 80;
+
+var jeuxQr = new CQr;
 
 var express = require('express');
 
@@ -71,67 +115,25 @@ console.log('TP CIEL');
 
 
 
-var question = '?';
-var bonneReponse = 0;
 
-// Connexion des clients a la WebSocket /qr et evenements associés 
-// Questions/reponses 
+
+
+/*  *************** serveur WebSocket express /qr *********************   */
+// 
 exp.ws('/qr', function (ws, req) {
-    console.log('Connection WebSocket %s sur le port %s',
-        req.connection.remoteAddress, req.connection.remotePort);
-    NouvelleQuestion();
+    console.log('Connection WebSocket %s sur le port %s', req.connection.remoteAddress,
+        req.connection.remotePort);
+    jeuxQr.NouvelleQuestion();
 
-    ws.on('message', TraiterReponse);
+    ws.on('message', TMessage);
+    function TMessage(message) {
+        jeuxQr.TraiterReponse(ws, message, req);
+    }
 
     ws.on('close', function (reasonCode, description) {
         console.log('Deconnexion WebSocket %s sur le port %s',
             req.connection.remoteAddress, req.connection.remotePort);
     });
-
-
-    function TraiterReponse(message) {
-        console.log('De %s %s, message :%s', req.connection.remoteAddress,
-            req.connection.remotePort, message);
-
-
-
-
-
-        if (message == bonneReponse) {
-            NouvelleQuestion();
-        }
-        else {
-            ws.send('Mauvaise reponse.');
-            setTimeout(() => {
-                
-                NouvelleQuestion();
-               
-            }, 3000);
-            
-        }
-
-    }
-
-
-    function NouvelleQuestion() {
-        /*var x = GetRandomInt(11);
-        var y = GetRandomInt(11);
-        question = x + '*' + y + ' =  ?';
-        bonneReponse = x * y;*/
-
-
-
-        var nombreDeci = Math.floor(Math.random() * 256);
-        var nombreBin = nombreDeci.toString(2).padStart(8, '0');
-        question = nombreBin;
-        bonneReponse = nombreDeci;
-
-
-        aWss.broadcast(question);
-    }
-
-    function GetRandomInt(max) {
-        return Math.floor(Math.random() * Math.floor(max));
-    }
+    
 
 }); 
